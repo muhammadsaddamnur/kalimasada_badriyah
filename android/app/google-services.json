@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "686095748714",
+    "firebase_url": "https://namdua-d4db2.firebaseio.com",
+    "project_id": "namdua-d4db2",
+    "storage_bucket": "namdua-d4db2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:686095748714:android:eab7cf47cd0c943534c413",
+        "android_client_info": {
+          "package_name": "com.example.kalimasada2020"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "686095748714-qad33j91q66juv7js91c463qkdd68qop.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDeeOkjhOvfB4D6FCskgxzE-j0w9m9ZHgw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "686095748714-qad33j91q66juv7js91c463qkdd68qop.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
