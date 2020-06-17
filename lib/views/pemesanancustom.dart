@@ -14,15 +14,15 @@ import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toast/toast.dart';
 
-class PemesananKatalog extends StatefulWidget {
+class PemesananCustom extends StatefulWidget {
   final List<dynamic> imagesTemplate;
   final String nama;
   final dynamic harga;
-  PemesananKatalog({this.imagesTemplate, this.nama, this.harga});
-  _PemesananKatalogState createState() => _PemesananKatalogState();
+  PemesananCustom({this.imagesTemplate, this.nama, this.harga});
+  _PemesananCustomState createState() => _PemesananCustomState();
 }
 
-class _PemesananKatalogState extends State<PemesananKatalog> {
+class _PemesananCustomState extends State<PemesananCustom> {
   final _namaTeam = TextEditingController();
   final _noHp = TextEditingController();
   final _alamat = TextEditingController();
@@ -31,9 +31,20 @@ class _PemesananKatalogState extends State<PemesananKatalog> {
   String kategori = 'diamond';
   int jumlah = 0;
   File _logo;
+  File _teamCustom;
   File _sponsor;
   File _pemain;
   bool loading = false;
+
+  Future getTeamCustom() async {
+    var teamCustom = await ImagePicker.pickImage(source: ImageSource.gallery);
+
+    if (teamCustom != null) {
+      setState(() {
+        _teamCustom = teamCustom;
+      });
+    }
+  }
 
   Future getLogo() async {
     var logo = await ImagePicker.pickImage(source: ImageSource.gallery);
@@ -71,12 +82,28 @@ class _PemesananKatalogState extends State<PemesananKatalog> {
   Future uploadFile() async {
     final FirebaseDatabase _database = FirebaseDatabase.instance;
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    String _uploadTeamCustomURL;
     String _uploadLogoURL;
     String _uploadSponsorURL;
     String _uploadPemainURL;
 
     setState(() {
       loading = true;
+    });
+
+    StorageReference teamCustomStorageReference = FirebaseStorage.instance
+        .ref()
+        .child(
+            'image/${DateTime.now().toUtc().millisecondsSinceEpoch.toString() + '-' + path.basename(_teamCustom.path)}');
+    StorageUploadTask teamCustomUploadTask =
+        teamCustomStorageReference.putFile(_teamCustom);
+    await teamCustomUploadTask.onComplete;
+    print('File Uploaded');
+
+    await teamCustomStorageReference.getDownloadURL().then((fileURL) {
+      setState(() {
+        _uploadTeamCustomURL = fileURL;
+      });
     });
 
     StorageReference logoStorageReference = FirebaseStorage.instance.ref().child(
@@ -131,7 +158,7 @@ class _PemesananKatalogState extends State<PemesananKatalog> {
         'address': _alamat.text,
         'purchase_status': 'Menunggu Pembayaran',
         'purchase_photo': 'null',
-        'custom_order': 'null',
+        'custom_order': _uploadTeamCustomURL,
         'catalog_name': widget.nama,
         'team_name': _namaTeam.text,
         'team_logo': _uploadLogoURL,
@@ -163,16 +190,6 @@ class _PemesananKatalogState extends State<PemesananKatalog> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        iconTheme: IconThemeData(
-          color: Colors.black,
-        ),
-        title: Text(
-          'Pemesanan',
-          style: TextStyle(color: Colors.black),
-        ),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ListView(
@@ -197,6 +214,46 @@ class _PemesananKatalogState extends State<PemesananKatalog> {
                 Currency.setPrice(value: widget.harga.toString()) + ' /pcs',
                 style: TextStyle(fontSize: 20),
               ),
+            ),
+            Text('Team Custom'),
+            _teamCustom == null ? SizedBox() : Image.file(_teamCustom),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Container(
+                    child: RaisedButton(
+                      elevation: 0,
+                      color: _teamCustom == null ? Colors.blue : Colors.red,
+                      child: Text(
+                        _teamCustom == null
+                            ? 'Upload Desain Kostum'
+                            : 'Ganti Desain Kostum',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      onPressed: getTeamCustom,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10),
+                _teamCustom == null
+                    ? SizedBox()
+                    : RaisedButton(
+                        elevation: 0,
+                        color: Colors.red,
+                        child: Text(
+                          'X',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _teamCustom = null;
+                          });
+                        },
+                      ),
+              ],
+            ),
+            SizedBox(
+              height: 5,
             ),
             Text('Logo'),
             _logo == null ? SizedBox() : Image.file(_logo),
@@ -449,11 +506,11 @@ class _PemesananKatalogState extends State<PemesananKatalog> {
             SizedBox(
               height: 5,
             ),
-            Text(
-              'Total : ' +
-                  Currency.setPrice(value: (widget.harga * jumlah).toString()),
-              style: TextStyle(fontSize: 20),
-            ),
+            // Text(
+            //   'Total : ' +
+            //       Currency.setPrice(value: (widget.harga * jumlah).toString()),
+            //   style: TextStyle(fontSize: 20),
+            // ),
             SizedBox(
               height: 5,
             ),
